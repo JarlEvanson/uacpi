@@ -1,8 +1,13 @@
 //! Build script for raw bindings to [uACPI](https://github.com/UltraOS/uACPI).
 
-use std::ffi::OsStr;
+use std::{ffi::OsStr, path::PathBuf};
 
 fn main() {
+    println!("cargo::rerun-if-changed=vendor");
+    println!("cargo::rerun-if-changed=src");
+    println!("cargo::rerun-if-changed=build.rs");
+
+    create_bindings();
     build_uacpi();
 }
 
@@ -31,4 +36,20 @@ fn build_uacpi() {
     }
 
     cc.compile("uacpi-sys");
+}
+
+fn create_bindings() {
+    let bindings = bindgen::builder()
+        .headers(["vendor/include/uacpi/uacpi.h"])
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+        .clang_args(["-Ivendor/include", "-ffreestanding"])
+        .use_core()
+        .prepend_enum_name(false)
+        .generate()
+        .expect("binding generation failed");
+
+    let out_path = PathBuf::from(std::env::var("OUT_DIR").unwrap());
+    bindings
+        .write_to_file(out_path.join("bindings.rs"))
+        .expect("binding write-out failed");
 }
