@@ -218,6 +218,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "uacpi"
+version = "0.1.0"
+dependencies = [
+ "uacpi-sys",
+]
+
+[[package]]
 name = "uacpi-sys"
 version = "0.1.0"
 dependencies = [

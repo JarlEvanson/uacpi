@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
-members = [
+members = [ 
+    "uacpi",
     "uacpi-sys",
 ]
 
@@ -9,6 +10,9 @@ authors = [ "Jarl Evanson <evanson.jarl@gmail.com>" ]
 edition = "2021"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/JarlEvanson/uacpi"
+
+[workspace.dependencies]
+uacpi-sys = { path = "uacpi-sys" }
 
 [workspace.lints.rust]
 # Safety lints
