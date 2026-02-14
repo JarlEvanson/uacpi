@@ -16,7 +16,36 @@ fn main() {
 
     let sized_frees = std::env::var_os("CARGO_FEATURE_SIZED_FREES").is_some();
 
+    create_bindings(&uacpi, sized_frees);
     build_uacpi(&uacpi, sized_frees);
+}
+
+fn create_bindings(uacpi: &Path, sized_frees: bool) {
+    let headers = [uacpi.join("include/uacpi/uacpi.h")];
+
+    let args = [
+        format!("-I{}/include", uacpi.display()),
+        "-ffreestanding".to_string(),
+    ];
+
+    let mut builder = bindgen::builder()
+        .headers(headers.iter().map(|pathbuf| pathbuf.to_string_lossy()))
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+        .clang_args(args)
+        .use_core()
+        .prepend_enum_name(false)
+        .layout_tests(false);
+
+    if sized_frees {
+        builder = builder.clang_arg("-DUACPI_SIZED_FREES");
+    }
+
+    let bindings = builder.generate().expect("binding generation failed");
+
+    let out_path = PathBuf::from(std::env::var("OUT_DIR").expect("Cargo failed to set OUT_DIR"));
+    bindings
+        .write_to_file(out_path.join("bindings.rs"))
+        .expect("binding write-out failed");
 }
 
 fn build_uacpi(uacpi: &Path, sized_frees: bool) {
@@ -46,7 +75,6 @@ fn build_uacpi(uacpi: &Path, sized_frees: bool) {
     cc.flag("-fno-stack-protector").flag("-mgeneral-regs-only");
 
     let target = std::env::var("TARGET").expect("Cargo failed to set TARGET");
-    println!("{target}");
     if target.starts_with("x86") {
         cc.flag("-mno-red-zone");
     }

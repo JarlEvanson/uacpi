@@ -12,4 +12,5 @@ sized-frees = []
 [dependencies]
 
 [build-dependencies]
+bindgen = "0.70"
 cc = "1.1"
