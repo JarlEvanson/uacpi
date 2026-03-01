@@ -1,6 +1,9 @@
 //! Build script for raw bindings to [uACPI](https://github.com/UltraOS/uACPI).
 
-use std::{ffi::OsStr, path::{Path, PathBuf}};
+use std::{
+    ffi::OsStr,
+    path::{Path, PathBuf},
+};
 
 const UACPI: &str = "../vendor/uacpi";
 
