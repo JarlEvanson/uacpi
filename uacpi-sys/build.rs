@@ -30,7 +30,27 @@ fn main() {
 }
 
 fn create_bindings(uacpi: &Path, sized_frees: bool, full_hardware: bool, aml_interpreter: bool) {
-    let headers = [uacpi.join("include/uacpi/uacpi.h")];
+    let headers = [
+        uacpi.join("include/uacpi/acpi.h"),
+        uacpi.join("include/uacpi/context.h"),
+        uacpi.join("include/uacpi/event.h"),
+        uacpi.join("include/uacpi/helpers.h"),
+        uacpi.join("include/uacpi/io.h"),
+        uacpi.join("include/uacpi/kernel_api.h"),
+        uacpi.join("include/uacpi/log.h"),
+        uacpi.join("include/uacpi/namespace.h"),
+        uacpi.join("include/uacpi/notify.h"),
+        uacpi.join("include/uacpi/opregion.h"),
+        uacpi.join("include/uacpi/osi.h"),
+        uacpi.join("include/uacpi/registers.h"),
+        uacpi.join("include/uacpi/resources.h"),
+        uacpi.join("include/uacpi/sleep.h"),
+        uacpi.join("include/uacpi/status.h"),
+        uacpi.join("include/uacpi/tables.h"),
+        uacpi.join("include/uacpi/types.h"),
+        uacpi.join("include/uacpi/uacpi.h"),
+        uacpi.join("include/uacpi/utilities.h"),
+    ];
 
     let args = [
         format!("-I{}/include", uacpi.display()),
