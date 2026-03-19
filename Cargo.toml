@@ -12,7 +12,7 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/JarlEvanson/uacpi"
 
 [workspace.dependencies]
-uacpi-sys = { path = "uacpi-sys" }
+uacpi-sys = { path = "uacpi-sys", default-features = false }
 
 [workspace.lints.rust]
 # Safety lints

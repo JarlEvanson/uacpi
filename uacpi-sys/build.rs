@@ -17,13 +17,19 @@ fn main() {
     println!("cargo::rerun-if-changed=Cargo.toml");
     println!("cargo::rerun-if-changed=build.rs");
 
-    let sized_frees = std::env::var_os("CARGO_FEATURE_SIZED_FREES").is_some();
+    println!("cargo::rerun-if-env-changed=CARGO_FEATURE_SIZED_FREES");
+    println!("cargo::rerun-if-env-changed=CARGO_FEATURE_FULL_HARDWARE");
+    println!("cargo::rerun-if-env-changed=CARGO_FEATURE_AML_INTERPRETER");
 
-    create_bindings(&uacpi, sized_frees);
-    build_uacpi(&uacpi, sized_frees);
+    let sized_frees = std::env::var_os("CARGO_FEATURE_SIZED_FREES").is_some();
+    let full_hardware = std::env::var_os("CARGO_FEATURE_FULL_HARDWARE").is_some();
+    let aml_interpreter = std::env::var_os("CARGO_FEATURE_AML_INTERPRETER").is_some();
+
+    create_bindings(&uacpi, sized_frees, full_hardware, aml_interpreter);
+    build_uacpi(&uacpi, sized_frees, full_hardware, aml_interpreter);
 }
 
-fn create_bindings(uacpi: &Path, sized_frees: bool) {
+fn create_bindings(uacpi: &Path, sized_frees: bool, full_hardware: bool, aml_interpreter: bool) {
     let headers = [uacpi.join("include/uacpi/uacpi.h")];
 
     let args = [
@@ -43,6 +49,14 @@ fn create_bindings(uacpi: &Path, sized_frees: bool) {
         builder = builder.clang_arg("-DUACPI_SIZED_FREES");
     }
 
+    if !full_hardware {
+        builder = builder.clang_arg("-DUACPI_REDUCED_HARDWARE");
+    }
+
+    if !aml_interpreter {
+        builder = builder.clang_arg("-DUACPI_BAREBONES_MODE");
+    }
+
     let bindings = builder.generate().expect("binding generation failed");
 
     let out_path = PathBuf::from(std::env::var("OUT_DIR").expect("Cargo failed to set OUT_DIR"));
@@ -51,7 +65,7 @@ fn create_bindings(uacpi: &Path, sized_frees: bool) {
         .expect("binding write-out failed");
 }
 
-fn build_uacpi(uacpi: &Path, sized_frees: bool) {
+fn build_uacpi(uacpi: &Path, sized_frees: bool, full_hardware: bool, aml_interpreter: bool) {
     let mut cc = cc::Build::new();
     cc.include(uacpi.join("include"));
 
@@ -72,6 +86,14 @@ fn build_uacpi(uacpi: &Path, sized_frees: bool) {
 
     if sized_frees {
         cc.define("UACPI_SIZED_FREES", "1");
+    }
+
+    if !full_hardware {
+        cc.define("UACPI_REDUCED_HARDWARE", "1");
+    }
+
+    if !aml_interpreter {
+        cc.define("UACPI_BAREBONES_MODE", "1");
     }
 
     cc.flag("-nostdlib").flag("-ffreestanding");
